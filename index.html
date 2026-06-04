@@ -1,17 +1,14 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-    <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="mobile-web-app-capable" content="yes">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Kasa POS</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Kasa POS">
     <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Kasa POS">
     
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💵</text></svg>">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💵</text></svg>">
@@ -19,7 +16,6 @@
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         
-        /* Zákaz označování textu prstem a odlesků při klikání (vhodné pro tablet) */
         body { 
             margin: 0; 
             padding: 10px; 
@@ -34,8 +30,8 @@
             -webkit-tap-highlight-color: transparent;
         }
         
-        /* Horní lišta pro nahrání souboru */
-        .import-bar { background: #ffffff; padding: 10px 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); display: flex; align-items: center; gap: 15px; border-left: 5px solid #007bff; }
+        /* Horní panel */
+        .import-bar { background: #ffffff; padding: 10px 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); display: flex; align-items: center; gap: 15px; border-left: 5px solid #007bff; flex-shrink: 0; }
         .import-bar label { font-weight: bold; color: #495057; font-size: 14px; }
         .file-input { font-size: 14px; color: #495057; }
         .status-msg { font-size: 13px; color: #28a745; font-style: italic; font-weight: bold; }
@@ -43,7 +39,7 @@
         /* Hlavní rozvržení */
         .main-workspace { display: flex; flex: 1; gap: 10px; overflow: hidden; }
         
-        /* SLOUPEC 1: ZÚŽENÝ NÁHLED ÚČTENKY */
+        /* SLOUPEC 1: NÁHLED ÚČTENKY (240px) */
         .cart-container { width: 240px; background: #ffffff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); display: flex; flex-direction: column; height: 100%; padding: 10px; border: 1px solid #dee2e6; flex-shrink: 0; }
         .cart-title { margin-top: 0; border-bottom: 2px solid #dee2e6; padding-bottom: 6px; font-size: 16px; color: #495057; display: flex; justify-content: space-between; }
         .cart-items { flex-grow: 1; overflow-y: auto; margin-bottom: 10px; padding-right: 3px; }
@@ -57,15 +53,45 @@
         .cart-item-remove:hover { background: #bd2130; }
         .cart-total { font-size: 16px; font-weight: bold; display: flex; justify-content: space-between; border-top: 2px solid #dee2e6; padding-top: 8px; margin-bottom: 3px; color: #fd7e14; }
 
-        /* SLOUPEC 2: KATEGORIE */
-        .categories-sidebar { width: 180px; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; height: 100%; padding-right: 3px; flex-shrink: 0; }
-        .category-btn { border: none; padding: 12px 10px; border-radius: 6px; cursor: pointer; font-weight: bold; text-align: left; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 2px 4px rgba(0,0,0,0.06); transition: all 0.2s ease; background-color: #e2e8f0; color: #4a5568; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .category-btn:hover { filter: brightness(0.9); transform: translateX(2px); }
-        .category-btn.active { background-color: #4a5568; color: white; outline: 3px solid #212529; outline-offset: -3px; font-size: 14px; box-shadow: 0 4px 8px rgba(0,0,0,0.12); }
-        .category-btn.cat-vse { background-color: #6c757d; color: white; }
-        .category-btn.cat-vse.active { background-color: #343a40; }
+        /* SLOUPEC 2: ROZŠÍŘENÉ A BAREVNÉ KATEGORIE (Nyní 210px) */
+        .categories-sidebar { width: 210px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; height: 100%; padding-right: 5px; flex-shrink: 0; }
+        
+        .category-btn { 
+            border: none; 
+            padding: 15px 12px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: 800; 
+            text-align: left; 
+            font-size: 14px; 
+            text-transform: uppercase; 
+            letter-spacing: 0.3px; 
+            box-shadow: 0 3px 6px rgba(0,0,0,0.06); 
+            transition: all 0.15s ease; 
+            color: #1e222b;
+            white-space: normal; /* Povolí zalomení dlouhého textu, pokud bude třeba */
+            word-break: break-word;
+            line-height: 1.3;
+            display: flex;
+            align-items: center;
+            min-height: 52px;
+            border: 2px solid transparent;
+        }
+        .category-btn:hover { filter: brightness(0.92); transform: translateX(2px); }
+        
+        /* Styl pro aktivní/vybranou kategorii */
+        .category-btn.active { 
+            border-color: #1e222b !important;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            font-size: 15px;
+            transform: scale(1.02) translateX(3px);
+        }
+        
+        /* Výchozí šedá pro tlačítko Vše */
+        .category-btn.cat-vse { background-color: #ced4da; color: #212529; }
+        .category-btn.cat-vse.active { background-color: #495057; color: white; }
 
-        /* SLOUPEC 3: MAXIMALIZOVANÝ PROSTOR PRO POLOŽKY */
+        /* SLOUPEC 3: PROSTOR PRO POLOŽKY */
         .products-container { flex: 1; background: #ffffff; border-radius: 8px; padding: 12px; height: 100%; display: flex; flex-direction: column; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border: 1px solid #dee2e6; overflow: hidden; }
         .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; overflow-y: auto; flex-grow: 1; content-visibility: auto; }
         
@@ -77,32 +103,34 @@
         .product-name { font-weight: 700; font-size: 13px; color: #212529; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; line-height: 1.2; word-break: break-word; }
         .product-price { color: #28a745; font-weight: 800; font-size: 14px; text-align: right; margin-top: 3px; letter-spacing: 0.2px; }
 
-        /* SLOUPEC 4: AKČNÍ TLAČÍTKA */
-        .actions-sidebar { width: 130px; display: flex; flex-direction: column; gap: 8px; height: 100%; flex-shrink: 0; }
-        .action-btn { border: none; padding: 10px 5px; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer; text-transform: uppercase; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; box-shadow: 0 3px 5px rgba(0,0,0,0.12); flex: 1; transition: all 0.2s; }
+        /* SLOUPEC 4: ZVĚTŠENÁ A ZVIDITELNĚNÁ AKČNÍ TLAČÍTKA (Nyní 170px) */
+        .actions-sidebar { width: 170px; display: flex; flex-direction: column; gap: 10px; height: 100%; flex-shrink: 0; }
+        .action-btn { border: none; padding: 12px 10px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; text-transform: uppercase; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 4px 6px rgba(0,0,0,0.12); flex: 1; transition: all 0.15s; }
         .action-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
         .action-btn:active { transform: scale(0.97); }
         
-        .btn-cash { background-color: #28a745; flex: 1.8; font-size: 14px; } 
-        .btn-card { background-color: #007bff; flex: 1.8; font-size: 14px; } 
-        .btn-storno { background-color: #dc3545; flex: 1; } 
-        .btn-report { background-color: #6c757d; flex: 1; }
-        .btn-icon { font-size: 20px; }
+        .btn-cash { background-color: #2eb85c; flex: 1.6; font-size: 15px; } 
+        .btn-card { background-color: #321fdb; flex: 1.6; font-size: 15px; } 
+        .btn-storno { background-color: #e55353; flex: 1; } 
+        
+        /* ZÁŘIVÁ UZÁVĚRKA - nyní skvěle viditelná žlutá */
+        .btn-report { background-color: #f9b115; color: #1e222b; flex: 1.2; font-size: 15px; border: 2px solid #f6960b; }
+        .btn-icon { font-size: 24px; }
 
         /* MODÁLNÍ OKNO - UZÁVĚRKA */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
-        .modal-content { background: #ffffff; border-radius: 8px; width: 90%; max-width: 900px; max-height: 85vh; display: flex; flex-direction: column; padding: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); border: 1px solid #dee2e6; color: #212529; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #dee2e6; padding-bottom: 8px; margin-bottom: 12px; }
-        .modal-body { overflow-y: auto; flex-grow: 1; margin-bottom: 12px; }
-        .modal-footer { display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid #dee2e6; padding-top: 12px; }
+        .modal-content { background: #ffffff; border-radius: 8px; width: 95%; max-width: 950px; max-height: 90vh; display: flex; flex-direction: column; padding: 20px; box-shadow: 0 5px 25px rgba(0,0,0,0.2); border: 1px solid #dee2e6; color: #212529; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #dee2e6; padding-bottom: 10px; margin-bottom: 15px; }
+        .modal-body { overflow-y: auto; flex-grow: 1; margin-bottom: 15px; }
+        .modal-footer { display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid #dee2e6; padding-top: 15px; }
         
         table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
-        th, td { padding: 10px; border-bottom: 1px solid #dee2e6; }
+        th, td { padding: 12px; border-bottom: 1px solid #dee2e6; }
         th { background: #f8f9fa; color: #495057; font-weight: bold; }
         
-        .close-btn { background: #6c757d; border: none; color: white; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; }
-        .export-btn { background: #28a745; border: none; color: white; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; }
-        .clear-history-btn { background: #dc3545; border: none; color: white; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; margin-right: auto; }
+        .close-btn { background: #639dff; border: none; color: white; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; }
+        .export-btn { background: #2eb85c; border: none; color: white; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; }
+        .clear-history-btn { background: #e55353; border: none; color: white; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; margin-right: auto; }
 
         .placeholder-text { text-align: center; color: #6c757d; font-size: 14px; margin-top: 30px; grid-column: 1 / -1; font-style: italic; }
     </style>
@@ -164,7 +192,7 @@
                 <button class="close-btn" onclick="closeReports()">X</button>
             </div>
             <div class="modal-body">
-                <div style="margin-bottom: 12px; font-size: 16px; font-weight: bold; color: #28a745;" id="summary-text">
+                <div style="margin-bottom: 15px; font-size: 18px; font-weight: bold; color: #2eb85c;" id="summary-text">
                     Celkem utrženo: 0 Kč
                 </div>
                 <table>
@@ -180,7 +208,7 @@
                 </table>
             </div>
             <div class="modal-footer">
-                <button class="clear-history-btn" onclick="clearSalesHistory()">Vynulovat kasu / Nový day</button>
+                <button class="clear-history-btn" onclick="clearSalesHistory()">Vynulovat kasu / Nový den</button>
                 <button class="export-btn" onclick="exportToCSV()">Export do Excelu</button>
                 <button class="close-btn" onclick="closeReports()">Zavřít</button>
             </div>
@@ -192,6 +220,12 @@
         let detectedCategories = [];
         let cart = [];
         let currentCategory = "Vše";
+
+        // Paleta veselých pastelových barev pro kategorie
+        const catColors = [
+            "#a8ffb2", "#a3e5ff", "#ffd1a3", "#e2bfff", "#ffbfe3", 
+            "#bffff6", "#ffefa3", "#ffbaba", "#d2ffba", "#bad2ff"
+        ];
 
         function handleFileSelect(event) {
             const file = event.target.files[0];
@@ -247,9 +281,15 @@
 
         function renderCategoryButtons() {
             const container = document.getElementById('categories-container');
-            let html = `<button class="category-btn cat-vse active" onclick="selectCategory('Vše')">Vše</button>`;
-            detectedCategories.forEach(cat => {
-                html += `<button class="category-btn" onclick="selectCategory('${cat.replace(/'/g, "\\'")}')">${cat}</button>`;
+            let html = `<button class="category-btn cat-vse active" onclick="selectCategory('Vše')">🌈 Vše</button>`;
+            
+            detectedCategories.forEach((cat, index) => {
+                // Dynamické přidělení barvy z palety podle indexu
+                const color = catColors[index % catColors.length];
+                html += `
+                    <button class="category-btn" style="background-color: ${color};" onclick="selectCategory('${cat.replace(/'/g, "\\'")}')">
+                        ${cat}
+                    </button>`;
             });
             container.innerHTML = html;
         }
@@ -258,9 +298,11 @@
             currentCategory = category;
             const buttons = document.querySelectorAll('.category-btn');
             buttons.forEach(btn => {
+                // Hledáme text uvnitř tlačítka s oříznutím mezer
+                const btnText = btn.innerText.replace('🌈 ', '').trim();
                 if (category === "Vše" && btn.classList.contains('cat-vse')) {
                     btn.classList.add('active');
-                } else if (btn.innerText === category) {
+                } else if (btnText === category) {
                     btn.classList.add('active');
                 } else {
                     btn.classList.remove('active');
@@ -384,9 +426,9 @@
                     return `
                         <tr>
                             <td>${sale.timestamp}</td>
-                            <td style="font-weight:bold; color: ${sale.type === 'HOTOVOST' ? '#28a745' : '#007bff'}">${sale.type}</td>
+                            <td style="font-weight:bold; color: ${sale.type === 'HOTOVOST' ? '#2eb85c' : '#321fdb'}">${sale.type}</td>
                             <td>${sale.items}</td>
-                            <td style="font-weight:bold; color:#28a745;">${sale.amount} Kč</td>
+                            <td style="font-weight:bold; color:#2eb85c;">${sale.amount} Kč</td>
                         </tr>
                     `;
                 }).join('');
