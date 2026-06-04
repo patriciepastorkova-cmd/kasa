@@ -13,6 +13,8 @@
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💵</text></svg>">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💵</text></svg>">
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         
@@ -39,10 +41,9 @@
         /* Hlavní rozvržení */
         .main-workspace { display: flex; flex: 1; gap: 10px; overflow: hidden; }
         
-        /* SLOUPEC 1: NÁHLED ÚČTENKY (240px) */
+        /* SLOUPEC 1: ÚČTENKA */
         .cart-container { width: 240px; background: #ffffff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); display: flex; flex-direction: column; height: 100%; padding: 10px; border: 1px solid #dee2e6; flex-shrink: 0; }
         
-        /* Přepínač účtů */
         .account-switcher { display: flex; gap: 5px; margin-bottom: 10px; background: #f1f3f5; padding: 3px; border-radius: 6px; }
         .account-tab { flex: 1; border: none; padding: 8px 5px; font-weight: bold; font-size: 12px; border-radius: 4px; cursor: pointer; text-align: center; background: transparent; color: #495057; transition: all 0.1s; }
         .account-tab.active { background: #007bff; color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
@@ -51,16 +52,13 @@
         .cart-title { margin-top: 0; border-bottom: 2px solid #dee2e6; padding-bottom: 6px; font-size: 15px; color: #495057; display: flex; justify-content: space-between; }
         .cart-items { flex-grow: 1; overflow-y: auto; margin-bottom: 10px; padding-right: 3px; }
         
-        /* Položka na účtence */
         .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #dee2e6; font-size: 13px; }
         .cart-item-details { display: flex; flex-direction: column; max-width: 65%; }
         .cart-item-name { font-weight: 600; color: #212529; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         
-        /* Upravené mačkání množství */
         .cart-item-qty-zone { font-size: 12px; color: #007bff; margin-top: 3px; display: flex; align-items: center; gap: 4px; }
         .qty-clickable { font-weight: bold; background: #e7f1ff; padding: 1px 5px; border-radius: 3px; cursor: pointer; border: 1px dashed #007bff; }
         .qty-change-btn { background: #e2e6ea; border: none; padding: 0px 6px; border-radius: 3px; font-weight: bold; cursor: pointer; font-size: 11px; color: #495057; }
-        .qty-change-btn:hover { background: #ced4da; }
 
         .cart-item-price { font-weight: bold; color: #28a745; font-size: 13px; text-align: right; }
         .cart-item-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
@@ -68,57 +66,33 @@
 
         .cart-total { font-size: 16px; font-weight: bold; display: flex; justify-content: space-between; border-top: 2px solid #dee2e6; padding-top: 8px; margin-bottom: 3px; color: #fd7e14; }
 
-        /* SLOUPEC 2: ROZŠÍŘENÉ A BAREVNÉ KATEGORIE (210px) */
+        /* SLOUPEC 2: KATEGORIE */
         .categories-sidebar { width: 210px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; height: 100%; padding-right: 5px; flex-shrink: 0; }
         
         .category-btn { 
-            border: none; 
-            padding: 15px 12px; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            font-weight: 800; 
-            text-align: left; 
-            font-size: 14px; 
-            text-transform: uppercase; 
-            letter-spacing: 0.3px; 
-            box-shadow: 0 3px 6px rgba(0,0,0,0.06); 
-            transition: all 0.15s ease; 
-            color: #1e222b;
-            white-space: normal; 
-            word-break: break-word;
-            line-height: 1.3;
-            display: flex;
-            align-items: center;
-            min-height: 52px;
-            border: 2px solid transparent;
+            border: none; padding: 15px 12px; border-radius: 8px; cursor: pointer; font-weight: 800; text-align: left; font-size: 14px; 
+            text-transform: uppercase; letter-spacing: 0.3px; box-shadow: 0 3px 6px rgba(0,0,0,0.06); transition: all 0.15s ease; 
+            color: #1e222b; white-space: normal; word-break: break-word; line-height: 1.3; display: flex; align-items: center; min-height: 52px; border: 2px solid transparent;
         }
         .category-btn:hover { filter: brightness(0.92); transform: translateX(2px); }
-        .category-btn.active { 
-            border-color: #1e222b !important;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            font-size: 15px;
-            transform: scale(1.02) translateX(3px);
-        }
-        
+        .category-btn.active { border-color: #1e222b !important; box-shadow: 0 4px 10px rgba(0,0,0,0.2); font-size: 15px; transform: scale(1.02) translateX(3px); }
         .category-btn.cat-vse { background-color: #ced4da; color: #212529; }
         .category-btn.cat-vse.active { background-color: #495057; color: white; }
 
-        /* SLOUPEC 3: PROSTOR PRO POLOŽKY */
+        /* SLOUPEC 3: POLOŽKY */
         .products-container { flex: 1; background: #ffffff; border-radius: 8px; padding: 12px; height: 100%; display: flex; flex-direction: column; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border: 1px solid #dee2e6; overflow: hidden; }
         .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; overflow-y: auto; flex-grow: 1; content-visibility: auto; }
         
         .product-card { background: #f8f9fa; border-radius: 6px; padding: 8px; text-align: left; box-shadow: 0 2px 4px rgba(0,0,0,0.04); cursor: pointer; border: 1px solid #e9ecef; transition: all 0.12s ease; display: flex; flex-direction: column; justify-content: space-between; height: 95px; }
         .product-card:hover { background: #e9ecef; border-color: #007bff; transform: translateY(-1px); }
-        .product-card:active { transform: scale(0.97); }
         
         .product-name { font-weight: 700; font-size: 13px; color: #212529; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; line-height: 1.2; word-break: break-word; }
-        .product-price { color: #28a745; font-weight: 800; font-size: 14px; text-align: right; margin-top: 3px; letter-spacing: 0.2px; }
+        .product-price { color: #28a745; font-weight: 800; font-size: 14px; text-align: right; margin-top: 3px; }
 
-        /* SLOUPEC 4: AKČNÍ TLAČÍTKA (170px) */
+        /* SLOUPEC 4: AKČNÍ TLAČÍTKA */
         .actions-sidebar { width: 170px; display: flex; flex-direction: column; gap: 10px; height: 100%; flex-shrink: 0; }
         .action-btn { border: none; padding: 12px 10px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; text-transform: uppercase; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 4px 6px rgba(0,0,0,0.12); flex: 1; transition: all 0.15s; }
         .action-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
-        .action-btn:active { transform: scale(0.97); }
         
         .btn-cash { background-color: #2eb85c; flex: 1.6; font-size: 15px; } 
         .btn-card { background-color: #321fdb; flex: 1.6; font-size: 15px; } 
@@ -126,20 +100,25 @@
         .btn-report { background-color: #f9b115; color: #1e222b; flex: 1.2; font-size: 15px; border: 2px solid #f6960b; }
         .btn-icon { font-size: 24px; }
 
-        /* MODÁLNÍ OKNO - UZÁVĚRKA */
+        /* MODÁLNÍ OKNO - ROZŠÍŘENÁ UZÁVĚRKA */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
         .modal-content { background: #ffffff; border-radius: 8px; width: 95%; max-width: 950px; max-height: 90vh; display: flex; flex-direction: column; padding: 20px; box-shadow: 0 5px 25px rgba(0,0,0,0.2); border: 1px solid #dee2e6; color: #212529; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #dee2e6; padding-bottom: 10px; margin-bottom: 15px; }
         .modal-body { overflow-y: auto; flex-grow: 1; margin-bottom: 15px; }
         .modal-footer { display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid #dee2e6; padding-top: 15px; }
         
-        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
-        th, td { padding: 12px; border-bottom: 1px solid #dee2e6; }
+        .report-summary-box { background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 6px; padding: 15px; margin-bottom: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .summary-card { padding: 5px; }
+        .summary-card-title { font-size: 12px; font-weight: bold; color: #6c757d; text-transform: uppercase; }
+        .summary-card-value { font-size: 20px; font-weight: 800; margin-top: 5px; }
+
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+        th, td { padding: 10px; border-bottom: 1px solid #dee2e6; }
         th { background: #f8f9fa; color: #495057; font-weight: bold; }
         
-        .close-btn { background: #639dff; border: none; color: white; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; }
-        .export-btn { background: #2eb85c; border: none; color: white; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; }
-        .clear-history-btn { background: #e55353; border: none; color: white; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; margin-right: auto; }
+        .close-btn { background: #6c757d; border: none; color: white; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; }
+        .pdf-btn { background: #e55353; border: none; color: white; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; }
+        .clear-history-btn { background: #000000; border: none; color: white; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; margin-right: auto; }
 
         .placeholder-text { text-align: center; color: #6c757d; font-size: 14px; margin-top: 30px; grid-column: 1 / -1; font-style: italic; }
     </style>
@@ -201,13 +180,32 @@
     <div class="modal" id="reports-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Přehled prodejů / Denní tržba</h2>
+                <h2>Denní uzávěrka tržeb</h2>
                 <button class="close-btn" onclick="closeReports()">X</button>
             </div>
             <div class="modal-body">
-                <div style="margin-bottom: 15px; font-size: 18px; font-weight: bold; color: #2eb85c;" id="summary-text">
-                    Celkem utrženo: 0 Kč
+                
+                <div class="report-summary-box">
+                    <div class="summary-card" style="border-left: 4px solid #fd7e14; padding-left: 10px;">
+                        <div class="summary-card-title">Celková tržba</div>
+                        <div class="summary-card-value" id="val-grand-total" style="color: #fd7e14;">0 Kč</div>
+                    </div>
+                    <div class="summary-card" style="border-left: 4px solid #2eb85c; padding-left: 10px;">
+                        <div class="summary-card-title">💵 Hotovost</div>
+                        <div class="summary-card-value" id="val-cash-total" style="color: #2eb85c;">0 Kč</div>
+                    </div>
+                    <div class="summary-card" style="border-left: 4px solid #321fdb; padding-left: 10px;">
+                        <div class="summary-card-title">💳 Kartou</div>
+                        <div class="summary-card-value" id="val-card-total" style="color: #321fdb;">0 Kč</div>
+                    </div>
+                    <div class="summary-card" style="border-left: 4px solid #6f42c1; padding-left: 10px;">
+                        <div class="summary-card-title">Rozdělení DPH (21%)</div>
+                        <div class="summary-card-value" id="val-dph-breakdown" style="font-size: 14px; color: #6f42c1; font-weight: bold; line-height: 1.3;">
+                            Základ: 0 Kč<br>DPH: 0 Kč
+                        </div>
+                    </div>
                 </div>
+
                 <table>
                     <thead>
                         <tr>
@@ -222,7 +220,7 @@
             </div>
             <div class="modal-footer">
                 <button class="clear-history-btn" onclick="clearSalesHistory()">Vynulovat kasu / Nový den</button>
-                <button class="export-btn" onclick="exportToCSV()">Export do Excelu</button>
+                <button class="pdf-btn" onclick="exportToPDF()">📄 Export do PDF</button>
                 <button class="close-btn" onclick="closeReports()">Zavřít</button>
             </div>
         </div>
@@ -234,15 +232,15 @@
         let currentCategory = "Vše";
 
         let currentAccount = 1;
-        let accountsCarts = {
-            1: [],
-            2: []
-        };
+        let accountsCarts = { 1: [], 2: [] };
 
         const catColors = [
             "#a8ffb2", "#a3e5ff", "#ffd1a3", "#e2bfff", "#ffbfe3", 
             "#bffff6", "#ffefa3", "#ffbaba", "#d2ffba", "#bad2ff"
         ];
+
+        // Sazba DPH (výchozí 21 % - lze změnit v kódu)
+        const DPH_RATE = 21; 
 
         function handleFileSelect(event) {
             const file = event.target.files[0];
@@ -287,7 +285,6 @@
 
             productsData = loadedProducts;
             detectedCategories = Array.from(categoriesSet).sort((a, b) => a.localeCompare(b, 'cs'));
-
             document.getElementById('status').innerText = `Aktivní! Načteno ${productsData.length} produktů.`;
             
             renderCategoryButtons();
@@ -299,13 +296,9 @@
         function renderCategoryButtons() {
             const container = document.getElementById('categories-container');
             let html = `<button class="category-btn cat-vse active" onclick="selectCategory('Vše')">🌈 Vše</button>`;
-            
             detectedCategories.forEach((cat, index) => {
                 const color = catColors[index % catColors.length];
-                html += `
-                    <button class="category-btn" style="background-color: ${color};" onclick="selectCategory('${cat.replace(/'/g, "\\'")}')">
-                        ${cat}
-                    </button>`;
+                html += `<button class="category-btn" style="background-color: ${color};" onclick="selectCategory('${cat.replace(/'/g, "\\'")}')">${cat}</button>`;
             });
             container.innerHTML = html;
         }
@@ -315,34 +308,21 @@
             const buttons = document.querySelectorAll('.category-btn');
             buttons.forEach(btn => {
                 const btnText = btn.innerText.replace('🌈 ', '').trim();
-                if (category === "Vše" && btn.classList.contains('cat-vse')) {
-                    btn.classList.add('active');
-                } else if (btnText === category) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
+                if (category === "Vše" && btn.classList.contains('cat-vse')) { btn.classList.add('active'); }
+                else if (btnText === category) { btn.classList.add('active'); }
+                else { btn.classList.remove('active'); }
             });
             renderProducts();
         }
 
         function renderProducts() {
             const container = document.getElementById('products-container');
-            let filtered = [];
-
-            if (currentCategory === "Vše") {
-                filtered = [...productsData];
-            } else {
-                filtered = productsData.filter(p => p.category === currentCategory);
-            }
-
+            let filtered = currentCategory === "Vše" ? [...productsData] : productsData.filter(p => p.category === currentCategory);
             if (filtered.length === 0) {
                 container.innerHTML = '<div class="placeholder-text">V této kategorii nejsou žádné položky.</div>';
                 return;
             }
-
             filtered.sort((a, b) => a.name.localeCompare(b.name, 'cs'));
-
             container.innerHTML = filtered.map(p => `
                 <div class="product-card" onclick="addToCart('${p.id}')">
                     <div class="product-name">${p.name}</div>
@@ -370,35 +350,21 @@
             const cart = accountsCarts[currentAccount];
             const item = cart.find(i => i.id === productId);
             if (!item) return;
-            
             item.quantity += step;
-            if (item.quantity <= 0) {
-                accountsCarts[currentAccount] = cart.filter(i => i.id !== productId);
-            }
+            if (item.quantity <= 0) { accountsCarts[currentAccount] = cart.filter(i => i.id !== productId); }
             updateCart();
         }
 
-        // KLÍČOVÁ FUNKCE: PŘEPSÁNÍ MNOŽSTVÍ NA JAKÉKOLIV ČÍSLO (např. 50)
         function editQuantityDirectly(productId) {
             const cart = accountsCarts[currentAccount];
             const item = cart.find(i => i.id === productId);
             if (!item) return;
-
             const userInput = prompt(`Zadejte nový počet kusů pro:\n${item.name}`, item.quantity);
-            
-            if (userInput === null) return; // Stornováno uživatelem
-
+            if (userInput === null) return;
             const newQty = parseInt(userInput.trim());
-            if (isNaN(newQty) || newQty < 0) {
-                alert("Zadejte prosím platné celé číslo.");
-                return;
-            }
-
-            if (newQty === 0) {
-                accountsCarts[currentAccount] = cart.filter(i => i.id !== productId);
-            } else {
-                item.quantity = newQty;
-            }
+            if (isNaN(newQty) || newQty < 0) { alert("Zadejte prosím platné celé číslo."); return; }
+            if (newQty === 0) { accountsCarts[currentAccount] = cart.filter(i => i.id !== productId); } 
+            else { item.quantity = newQty; }
             updateCart();
         }
 
@@ -410,16 +376,13 @@
         function updateCart() {
             const cart = accountsCarts[currentAccount];
             const container = document.getElementById('cart-items');
-            const totalContainer = document.getElementById('cart-total-amount');
-            const countContainer = document.getElementById('items-count');
-            
             container.innerHTML = cart.map(item => `
                 <div class="cart-item">
                     <div class="cart-item-details">
                         <span class="cart-item-name">${item.name}</span>
                         <div class="cart-item-qty-zone">
                             <button class="qty-change-btn" onclick="changeQuantityStep('${item.id}', -1)">-</button>
-                            <span class="qty-clickable" title="Klikněte pro přepsání" onclick="editQuantityDirectly('${item.id}')">${item.quantity} ks</span>
+                            <span class="qty-clickable" onclick="editQuantityDirectly('${item.id}')">${item.quantity} ks</span>
                             <button class="qty-change-btn" onclick="changeQuantityStep('${item.id}', 1)">+</button>
                             <span>@ ${item.price} Kč</span>
                         </div>
@@ -433,8 +396,8 @@
 
             const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             const totalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
-            totalContainer.innerText = `${total} Kč`;
-            countContainer.innerText = `(${totalQty} ks)`;
+            document.getElementById('cart-total-amount').innerText = `${total} Kč`;
+            document.getElementById('items-count').innerText = `(${totalQty} ks)`;
 
             document.getElementById('tab-account1').classList.toggle('has-items', accountsCarts[1].length > 0);
             document.getElementById('tab-account2').classList.toggle('has-items', accountsCarts[2].length > 0);
@@ -451,29 +414,19 @@
 
         function processPayment(method) {
             const cart = accountsCarts[currentAccount];
-            if (cart.length === 0) {
-                alert("Účtenka je prázdná! Nelze zaplatit.");
-                return;
-            }
+            if (cart.length === 0) { alert("Účtenka je prázdná! Nelze zaplatit."); return; }
 
             const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             const now = new Date();
             const timeString = now.toLocaleDateString('cs-CZ') + ' ' + now.toLocaleTimeString('cs-CZ');
             const itemsSummary = cart.map(item => `${item.name} (${item.quantity}x)`).join(', ');
 
-            const saleRecord = {
-                timestamp: timeString,
-                type: method,
-                items: itemsSummary,
-                amount: total
-            };
-
+            const saleRecord = { timestamp: timeString, type: method, items: itemsSummary, amount: total };
             const existingSales = JSON.parse(localStorage.getItem('pos_sales_history')) || [];
             existingSales.push(saleRecord);
             localStorage.setItem('pos_sales_history', JSON.stringify(existingSales));
 
             alert(`ÚČET ${currentAccount} UZAVŘEN\nMetoda: ${method}\nCelkem zaplaceno: ${total} Kč`);
-            
             accountsCarts[currentAccount] = [];
             updateCart();
         }
@@ -481,14 +434,13 @@
         function openReports() {
             const modal = document.getElementById('reports-modal');
             const tbody = document.getElementById('sales-table-body');
-            const summaryText = document.getElementById('summary-text');
             const sales = JSON.parse(localStorage.getItem('pos_sales_history')) || [];
             
+            let grandTotal = 0, cashTotal = 0, cardTotal = 0;
+
             if (sales.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; font-style:italic;">Zatím neproběhly žádné prodeje.</td></tr>';
-                summaryText.innerText = "Celkem utrženo: 0 Kč";
             } else {
-                let grandTotal = 0, cashTotal = 0, cardTotal = 0;
                 tbody.innerHTML = sales.map(sale => {
                     grandTotal += sale.amount;
                     if (sale.type === 'HOTOVOST') cashTotal += sale.amount;
@@ -502,35 +454,130 @@
                         </tr>
                     `;
                 }).join('');
-                summaryText.innerHTML = `Celkem utrženo: ${grandTotal} Kč &nbsp;|&nbsp; 💵 Hotovost: ${cashTotal} Kč &nbsp;|&nbsp; 💳 Karta: ${cardTotal} Kč`;
             }
+
+            // Výpočet matematického rozpadu DPH z celkové částky (cena s DPH / 1.21)
+            const zakladDane = Math.round(grandTotal / (1 + (DPH_RATE / 100)));
+            const dphHodnota = grandTotal - zakladDane;
+
+            // Propsání do přehledových kartiček
+            document.getElementById('val-grand-total').innerText = `${grandTotal} Kč`;
+            document.getElementById('val-cash-total').innerText = `${cashTotal} Kč`;
+            document.getElementById('val-card-total').innerText = `${cardTotal} Kč`;
+            document.getElementById('val-dph-breakdown').innerHTML = `Základ: ${zakladDane} Kč<br>DPH (${DPH_RATE}%): ${dphHodnota} Kč`;
+
             modal.style.display = 'flex';
         }
 
         function closeReports() { document.getElementById('reports-modal').style.display = 'none'; }
 
         function clearSalesHistory() {
-            if (confirm("Opravdu chcete VYMAZAT celou historii prodejů?")) {
+            if (confirm("Opravdu chcete VYMAZAT celou historii prodejů a začít nový den?")) {
                 localStorage.removeItem('pos_sales_history');
                 openReports();
             }
         }
 
-        function exportToCSV() {
+        // GENERÁTOR DO PDF BEZ DIACRITICKÝCH CHYB
+        function exportToPDF() {
             const sales = JSON.parse(localStorage.getItem('pos_sales_history')) || [];
-            if (sales.length === 0) { alert("Není co exportovat."); return; }
-            let csvContent = "\uFEFFDatum a cas;Typ platby;Polozky;Castka s DPH\n";
-            sales.forEach(sale => {
-                csvContent += `"${sale.timestamp}";"${sale.type}";"${sale.items.replace(/"/g, '""')}";${sale.amount}\n`;
+            if (sales.length === 0) { alert("Není co exportovat, historie je prázdná."); return; }
+
+            // Funkce pro odstranění české diakritiky, aby PDF knihovna v tabletech nepsala chyby a otazníky
+            const bezDiakritiky = (text) => {
+                return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                           .replace(/Č/g, "C").replace(/č/g, "c")
+                           .replace(/Š/g, "S").replace(/š/g, "s")
+                           .replace(/Ž/g, "Z").replace(/ž/g, "z")
+                           .replace(/Ř/g, "R").replace(/ř/g, "r")
+                           .replace(/Ď/g, "D").replace(/ď/g, "d")
+                           .replace(/Ť/g, "T").replace(/ť/g, "t")
+                           .replace(/Ň/g, "N").replace(/ň/g, "n")
+                           .replace(/Ů/g, "U").replace(/ů/g, "u");
+            };
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            let grandTotal = 0, cashTotal = 0, cardTotal = 0;
+            sales.forEach(s => {
+                grandTotal += s.amount;
+                if (s.type === 'HOTOVOST') cashTotal += s.amount;
+                if (s.type === 'KARTA') cardTotal += s.amount;
             });
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.setAttribute("href", url);
-            link.setAttribute("download", `uzavierka_${new Date().toISOString().slice(0,10)}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+
+            const zakladDane = Math.round(grandTotal / (1 + (DPH_RATE / 100)));
+            const dphHodnota = grandTotal - zakladDane;
+            const datumCas = new Date().toLocaleString('cs-CZ');
+
+            // Sestavení vzhledu PDF stránky (vše ošetřeno funkcí bezDiakritiky)
+            doc.setFont("Helvetica", "bold");
+            doc.setFontSize(22);
+            doc.text(bezDiakritiky("DENNI UZAVERKA TRZEB"), 14, 20);
+            
+            doc.setFont("Helvetica", "normal");
+            doc.setFontSize(10);
+            doc.text(`${bezDiakritiky("Vygenerovano dne:")} ${datumCas}`, 14, 28);
+            
+            // Linka
+            doc.setLineWidth(0.5);
+            doc.line(14, 32, 196, 32);
+
+            // Blok Finančního přehledu
+            doc.setFont("Helvetica", "bold");
+            doc.setFontSize(14);
+            doc.text(bezDiakritiky("FINANCNI PREHLED:"), 14, 42);
+            
+            doc.setFont("Helvetica", "normal");
+            doc.setFontSize(12);
+            doc.text(`${bezDiakritiky("Celkova trzba:")} ${grandTotal} Kc`, 14, 50);
+            doc.text(`${bezDiakritiky("Trzba Hotovost:")} ${cashTotal} Kc`, 14, 57);
+            doc.text(`${bezDiakritiky("Trzba Karta:")} ${cardTotal} Kc`, 14, 64);
+            
+            // Blok DPH
+            doc.setFont("Helvetica", "bold");
+            doc.text(`${bezDiakritiky("Rozpis DPH (Sazba ")} ${DPH_RATE}%):`, 110, 42);
+            doc.setFont("Helvetica", "normal");
+            doc.text(`${bezDiakritiky("Zaklad dane:")} ${zakladDane} Kc`, 110, 50);
+            doc.text(`${bezDiakritiky("Dan (DPH):")} ${dphHodnota} Kc`, 110, 57);
+
+            doc.line(14, 72, 196, 72);
+
+            // Seznam prodejů
+            doc.setFont("Helvetica", "bold");
+            doc.setFontSize(14);
+            doc.text(bezDiakritiky("SEZNAM JEDNOTLIVYCH PRODEJU:"), 14, 82);
+
+            doc.setFontSize(10);
+            doc.text(bezDiakritiky("Cas prodeje"), 14, 92);
+            doc.text(bezDiakritiky("Platba"), 55, 92);
+            doc.text(bezDiakritiky("Polozky nákupu"), 85, 92);
+            doc.text(bezDiakritiky("Castka"), 175, 92);
+            
+            doc.line(14, 94, 196, 94);
+            
+            doc.setFont("Helvetica", "normal");
+            let y = 100;
+
+            sales.forEach((sale) => {
+                // Pokud by položky přetékaly dolů, zabráníme zničení stránky
+                if (y > 275) { doc.addPage(); y = 20; }
+                
+                doc.text(sale.timestamp.split(' ')[1] || sale.timestamp, 14, y);
+                doc.text(bezDiakritiky(sale.type), 55, y);
+                
+                // Zkrácení extrémně dlouhých názvů, aby se vešly do tabulky PDF
+                let zkracenePolozky = bezDiakritiky(sale.items);
+                if (zkracenePolozky.length > 42) zkracenePolozky = zkracenePolozky.substring(0, 40) + "...";
+                
+                doc.text(zkracenePolozky, 85, y);
+                doc.text(`${sale.amount} Kc`, 175, y);
+                y += 7;
+            });
+
+            // Stažení PDF souboru
+            const jmenoSouboru = `uzaverka_${new Date().toISOString().slice(0,10)}.pdf`;
+            doc.save(jmenoSouboru);
         }
     </script>
 </body>
